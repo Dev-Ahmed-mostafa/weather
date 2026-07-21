@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 
 <head>
     <meta charset="UTF-8">
@@ -93,6 +93,37 @@
         .add-place .use-device-place {
             margin: 10px;
         }
+        .main-page {
+            display: flex;
+            align-items: center;
+            height: 70dvh;
+        }
+        .summary {
+            width: 40%;
+            min-width: 250px;
+            height: 40%;
+            min-height: 250px;
+            margin-right: auto;
+            margin-left: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background-color: #b7e7ffc7;
+            border-radius: 30px;
+            gap: 10px;
+        }
+        .content {
+            position: absolute;
+            height:70dvh;
+            margin-right: 50px;
+            font-weight: 1000;
+        }
+        .summary .main {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 0 20px;
+        }
         footer {
             width: 100%;
             background-color: #ccc;
@@ -131,12 +162,14 @@
         </div>
         <div class="main-page">
             <div class="summary">
-                <h2 id="place">qena</h2>
-                <h2 id="temp-place">41 celicus</h2>
-                <h3 id="real-feelp-place">feels like: 41 celicus</h3>
+                <div class="main">
+                    <h2 id="place" style="margin: 20px; font-size: 40px;">قنا</h2>
+                    <h2 id="temp-place" style="margin: 20px; font-size: 40px;">41 درجة مئوية</h2>
+                </div>
+                <h3 id="real-feelp-place" style="margin-inline: 40px; font-size: 24px;">يبدو وكأنها: 41 درجة مئوية</h3>
             </div>
             <div class="content">
-                <h2 id="address"></h2>
+                <h2 id="address">قنا - مصر</h2>
                 <p id="temp"></p>
                 <p id="desc"></p>
                 <p id="feels-like"></p>
