@@ -21,7 +21,12 @@
             display: flex;
             flex-direction: column;
         }
-        * {box-sizing: border-box; font-family: inherit;}
+
+        * {
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
         header {
             border-radius: 30px;
             width: 90%;
@@ -32,27 +37,37 @@
             justify-content: center;
             margin: 0 auto;
         }
-        nav {margin: auto;}
+
+        nav {
+            margin: auto;
+        }
+
         nav a {
             margin-inline: 10px;
             text-decoration: none;
             color: #000;
             transition: all .2s ease;
         }
-        nav a:hover {color: rgb(0, 0, 255);}
+
+        nav a:hover {
+            color: rgb(0, 0, 255);
+        }
+
         .langs {
             position: absolute;
             left: 85%;
         }
+
         .langs .langs-btn {
             display: none;
             width: 150px;
             height: 80px;
             background: #55321b;
             border-radius: 10px;
-             flex-direction: column;
+            flex-direction: column;
             justify-content: center;
         }
+
         .langs-btn button {
             background: none;
             border: none;
@@ -61,12 +76,15 @@
             transition: all .3s ease;
             cursor: pointer;
         }
+
         .langs-btn button:hover {
             background-color: #854e2a;
         }
-        .langs:hover  .langs-btn {
+
+        .langs:hover .langs-btn {
             display: flex;
         }
+
         .add-place {
             width: 300px;
             aspect-ratio: 1/1;
@@ -74,12 +92,15 @@
             text-align: center;
             display: none;
         }
+
         .add-place input {
             width: 100%;
         }
+
         .add-place label {
             user-select: none;
         }
+
         .add-place button {
             width: 100%;
             height: 30px;
@@ -90,14 +111,17 @@
             border: none;
             cursor: pointer;
         }
+
         .add-place .use-device-place {
             margin: 10px;
         }
+
         .main-page {
             display: flex;
             align-items: center;
             height: 70dvh;
         }
+
         .summary {
             width: 40%;
             min-width: 250px;
@@ -112,6 +136,7 @@
             border-radius: 30px;
             gap: 10px;
         }
+
         .content {
             position: absolute;
 
@@ -119,17 +144,20 @@
             margin-right: 50px;
             font-weight: 1000;
         }
+
         .summary .main {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin: 0 20px;
         }
+
         .content p {
             font-weight: 400;
             font-size: 20px;
             margin: 30px 15px 0 0;
         }
+
         footer {
             width: 100%;
             background-color: #ccc;
@@ -138,7 +166,6 @@
             top: -8px;
             text-align: center;
         }
-        
     </style>
 </head>
 
@@ -173,23 +200,85 @@
                     <h2 id="place" style="margin: 20px; font-size: 40px;">قنا</h2>
                     <h2 id="temp-place" style="margin: 20px; font-size: 40px;">41 درجة مئوية</h2>
                 </div>
-                <h3 id="real-feelp-place" style="margin-inline: 40px; font-size: 24px;">يبدو وكأنها: 41 درجة مئوية</h3>
+                <h3 id="real-feel-place" style="margin-inline: 40px; font-size: 24px;">يبدو وكأنها: 41 درجة مئوية</h3>
             </div>
             <div class="content">
                 <h2 id="address" style="margin: 20px; font-size: 32px;">قنا - مصر</h2>
                 <p id="temp">درجة الحرارة: 41 درجة مئوية</p>
                 <p id="desc">وصف الطقس: مشمس واضح</p>
-                <p id="feels-like">يبدو وكأنها:40 درجة مئوية</p>
+                <p id="real-feel-place">يبدو وكأنها:40 درجة مئوية</p>
                 <p id="humidity">الرطوبة: شبه منعدمة</p>
                 <p id="wind-speed">سرعة الرياح: 13 كم/س</p>
             </div>
         </div>
+        <dialog id="error-message">
+            <p>عفوا ، تم ادخال مدينة قيمة غير صحيةي الرجاء اخال اسم المدينة او تحديد مكان الجهاز</p>
+            <button class="btn_error-message">الرجوع</button>
+        </dialog>
     </main>
     <footer>
         <p>حقوق النشر لسنة - &copy; 2025 - 2026 كل الحقوق محفوظة لاحمد</p>
     </footer>
     <script>
-        
+        // Main Variables
+        // Element Vaiables
+        const place_text = document.getElementById("place");
+        const tempPlace = document.getElementById("temp-place");
+        const realFeelpPlace = document.getElementById("real-feelp-place");
+        const address = document.getElementById("address");
+        const temp = document.getElementById("temp");
+        const desc = document.getElementById("desc");
+        const feelsLike = document.getElementById("real-feel-place");
+        const humidity = document.getElementById("humidity");
+        const windSpeed = document.getElementById("wind-speed");
+        const addPlace_input = document.getElementById("city");
+        const addPlace_checkbox = document.getElementById("on-device");
+        const add_place_btn = document.getElementById("send-place-info");
+        const error_message = document.getElementById("error-message")
+
+        window.onload = addPlace_checkbox.checked = false;
+
+        // API Key Variable     
+        const apiKey = "6746a09b1b408f39b35756a151b6aed5"
+        // End Variables
+
+        // Define Functions
+        // Get If User choose device place or enter city
+        function place_mode() {
+            add_place_btn.addEventListener("click", (e) => {
+                e.preventDefault();
+                let addPlace_checkbox_status = addPlace_checkbox.checked;
+                let city = addPlace_input.value
+                let city_mode = ["city mode", city]
+                if (addPlace_checkbox_status) { return "device mode" }
+                else {
+                    if (typeof place !== "string") error_message.showModal();
+                    return city_mode
+                }
+            })
+        }
+        // Get The User Place
+        function getplace() {
+            if (place_mode) return;
+        }
+
+        function get_device_place() {
+            return new Promise((resolve, reject) => {
+                if ("geolocation" in navigator) {
+                    navigator.geolocation.getCurrentPosition(
+                        (pos) => {
+                            resolve({
+                                latitude: pos.coords.latitude,
+                                longitude: pos.coords.longitude
+                            });
+                        },
+                        reject
+                    );
+                } else {
+                    reject("Geolocation is not supported.");
+                }
+            });
+        }
     </script>
 </body>
 
