@@ -56,6 +56,7 @@
         .langs {
             position: absolute;
             left: 85%;
+            cursor: pointer;
         }
 
         .langs .langs-btn {
@@ -66,6 +67,7 @@
             border-radius: 10px;
             flex-direction: column;
             justify-content: center;
+            position: absolute;
         }
 
         .langs-btn button {
@@ -139,7 +141,6 @@
 
         .content {
             position: absolute;
-
             height: 60dvh;
             margin-right: 50px;
             font-weight: 1000;
@@ -177,7 +178,7 @@
             <a href="#">المدونة</a>
         </nav>
         <div class="langs">
-            <p>اللغة</p>
+            <p style="direction: ltr;">اللغة </p>
             <div class="langs-btn">
                 <button>English</button>
                 <button>عربي</button>
@@ -212,7 +213,7 @@
             </div>
         </div>
         <dialog id="error-message">
-            <p>عفوا ، تم ادخال مدينة قيمة غير صحيةي الرجاء اخال اسم المدينة او تحديد مكان الجهاز</p>
+            <p id="error_text">عفوا ، تم ادخال مدينة قيمة غير صحيةي الرجاء اخال اسم المدينة او تحديد مكان الجهاز</p>
             <button class="btn_error-message">الرجوع</button>
         </dialog>
     </main>
@@ -235,6 +236,7 @@
         const addPlace_checkbox = document.getElementById("on-device");
         const add_place_btn = document.getElementById("send-place-info");
         const error_message = document.getElementById("error-message")
+        const error_message_text = error_message.getElementById("error_text")
 
         window.onload = addPlace_checkbox.checked = false;
 
@@ -244,25 +246,34 @@
 
         // Define Functions
         // Get If User choose device place or enter city
-        function place_mode() {
-            add_place_btn.addEventListener("click", (e) => {
-                e.preventDefault();
-                let addPlace_checkbox_status = addPlace_checkbox.checked;
-                let city = addPlace_input.value
-                let city_mode = ["city mode", city]
-                if (addPlace_checkbox_status) { return "device mode" }
-                else {
-                    if (typeof place !== "string") error_message.showModal();
-                    return city_mode
-                }
-            })
-        }
-        // Get The User Place
-        function getplace() {
-            if (place_mode) return;
+
+        function placeMode() {
+            let addPlace_checkbox_status = addPlace_checkbox.checked;
+            let city = addPlace_input.value
+            let city_mode = ["city mode", city]
+            if (addPlace_checkbox_status) { return "device mode" }
+            else {
+                if (typeof place !== "string") error_message_text.innerText = "الجاء ادخال قيمة صحيحة"; error_message.showModal();
+                return city_mode
+            }
         }
 
-        function get_device_place() {
+        // Get The User Place and Weather
+        async function getPlaceWeather() {
+            let mode = placeMode();
+            if (mode === "device mode") {
+                let device_place = await getDevicePlace();
+                return device_place
+            }
+            else if (Array.isArray(mode)) {
+                return mode
+            }
+            else {
+                return null;
+            }
+        }
+
+        function getDevicePlace() {
             return new Promise((resolve, reject) => {
                 if ("geolocation" in navigator) {
                     navigator.geolocation.getCurrentPosition(
@@ -275,10 +286,17 @@
                         reject
                     );
                 } else {
-                    reject("Geolocation is not supported.");
+                    error_message_text.innerText = "ميزة "
+                    reject(new Error("Geolocation is not supported."));
                 }
             });
         }
+
+
+        add_place_btn.addEventListener("click", (e) => {
+            e.preventDefault();
+            getPlace();
+        })
     </script>
 </body>
 
