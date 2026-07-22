@@ -243,7 +243,7 @@
         // API Key Variable     
         const apiKey = "6746a09b1b408f39b35756a151b6aed5"
         // End Variables
-
+        // maim
         // Define Functions
         // Get If User choose device place or enter city
 
@@ -253,7 +253,7 @@
             let city_mode = ["city mode", city]
             if (addPlace_checkbox_status) { return "device mode" }
             else {
-                if (typeof place !== "string") error_message_text.innerText = "الجاء ادخال قيمة صحيحة"; error_message.showModal();
+                if (city.trim() == ""){ error_message_text.innerText = "الجاء ادخال قيمة صحيحة"; error_message.showModal(); return null;}
                 return city_mode
             }
         }
