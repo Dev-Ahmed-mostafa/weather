@@ -247,55 +247,64 @@
         // Define Functions
         // Get If User choose device place or enter city
 
-        function placeMode() {
-            let addPlace_checkbox_status = addPlace_checkbox.checked;
-            let city = addPlace_input.value
-            let city_mode = ["city mode", city]
-            if (addPlace_checkbox_status) { return "device mode" }
-            else {
-                if (city.trim() == ""){ error_message_text.innerText = "الجاء ادخال قيمة صحيحة"; error_message.showModal(); return null;}
-                return city_mode
-            }
-        }
-
-        // Get The User Place and Weather
-        async function getPlaceWeather() {
-            let mode = placeMode();
-            if (mode === "device mode") {
-                let device_place = await getDevicePlace();
-                return device_place
-            }
-            else if (Array.isArray(mode)) {
-                return mode
-            }
-            else {
-                return null;
-            }
-        }
-
-        function getDevicePlace() {
-            return new Promise((resolve, reject) => {
-                if ("geolocation" in navigator) {
-                    navigator.geolocation.getCurrentPosition(
-                        (pos) => {
-                            resolve({
-                                latitude: pos.coords.latitude,
-                                longitude: pos.coords.longitude
-                            });
-                        },
-                        reject
-                    );
-                } else {
-                    error_message_text.innerText = "ميزة "
-                    reject(new Error("Geolocation is not supported."));
+        function App() {
+            function placeMode() {
+                let addPlace_checkbox_status = addPlace_checkbox.checked;
+                let city = addPlace_input.value
+                if (addPlace_checkbox_status) { return "device mode" }
+                else {
+                    if (city.trim() == ""){ error_message_text.innerText = "الجاء ادخال قيمة صحيحة"; error_message.showModal(); return null;}
+                    let city_mode = ["city mode", city]
+                    return city_mode
                 }
-            });
-        }
+            }
+    
+            // Get The User Place and Weather
+            async function getPlaceWeather() {
+                let mode = placeMode();
+                if (mode === "device mode") {
+                    try {
+                        let device_place = await getDevicePlace();
+                        return device_place;
+                    } catch (error) {
+                        error_message_text.innerText = `يوجد خطأ ما، اذا ادخلت البيانات الصحيحة، الرجاء المحاولة مرة اخرى. error: ${error}`;
+                        error_message.showModal();
+                    }
+                    return null
+                }
 
+                else if (Array.isArray(mode)) {
+                    return mode
+                }
+                
+                else {
+                    return null;
+                }
+            }
+    
+            function getDevicePlace() {
+                return new Promise((resolve, reject) => {
+                    if ("geolocation" in navigator) {
+                        navigator.geolocation.getCurrentPosition(
+                            (pos) => {
+                                resolve({
+                                    latitude: pos.coords.latitude,
+                                    longitude: pos.coords.longitude
+                                });
+                            },
+                            reject
+                        );
+                    } else {
+                        error_message_text.innerText = "ميزة "
+                        reject(new Error("Geolocation is not supported."));
+                    }
+                });
+            }
+        }
 
         add_place_btn.addEventListener("click", (e) => {
             e.preventDefault();
-            getPlace();
+            App();
         })
     </script>
 </body>
