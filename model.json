@@ -1,0 +1,44 @@
+{
+  "coord": {
+    "lon": 32.7183,
+    "lat": 26.1615
+  },
+  "weather": [
+    {
+      "id": 801,
+      "main": "Clouds",
+      "description": "few clouds",
+      "icon": "02d"
+    }
+  ],
+  "base": "stations",
+  "main": {
+    "temp": 39.89,
+    "feels_like": 37.65,
+    "temp_min": 39.89,
+    "temp_max": 39.89,
+    "pressure": 1006,
+    "humidity": 14,
+    "sea_level": 1006,
+    "grnd_level": 989
+  },
+  "visibility": 10000,
+  "wind": {
+    "speed": 5.02,
+    "deg": 308,
+    "gust": 5.32
+  },
+  "clouds": {
+    "all": 15
+  },
+  "dt": 1784798776,
+  "sys": {
+    "country": "EG",
+    "sunrise": 1784776199,
+    "sunset": 1784824853
+  },
+  "timezone": 10800,
+  "id": 350550,
+  "name": "Qena",
+  "cod": 200
+}
