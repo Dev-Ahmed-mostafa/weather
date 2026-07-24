@@ -198,18 +198,20 @@
         <div class="main-page">
             <div class="summary">
                 <div class="main">
-                    <h2 id="place" style="margin: 20px; font-size: 40px;">قنا</h2>
-                    <h2 id="temp-place" style="margin: 20px; font-size: 40px;">41 درجة مئوية</h2>
+                    <h2 id="place" style="margin: 20px; font-size: 40px;" data-element-rule="place">قنا</h2>
+                    <h2 id="temp-place" style="margin: 20px; font-size: 40px;" data-element-rule="temp">41 درجة مئوية
+                    </h2>
                 </div>
-                <h3 id="real-feel-place" style="margin-inline: 40px; font-size: 24px;">يبدو وكأنها: 41 درجة مئوية</h3>
+                <h3 id="real-feel-place" style="margin-inline: 40px; font-size: 24px;" data-element-rule="feels-like">
+                    يبدو وكأنها: 41 درجة مئوية</h3>
             </div>
             <div class="content">
-                <h2 id="address" style="margin: 20px; font-size: 32px;">قنا - مصر</h2>
-                <p id="temp">درجة الحرارة: 41 درجة مئوية</p>
-                <p id="desc">وصف الطقس: مشمس واضح</p>
-                <p id="real-feel-place">يبدو وكأنها:40 درجة مئوية</p>
-                <p id="humidity">الرطوبة: شبه منعدمة</p>
-                <p id="wind-speed">سرعة الرياح: 13 كم/س</p>
+                <h2 id="address" style="margin: 20px; font-size: 32px;" data-element-rule="address">قنا - مصر</h2>
+                <p data-element-rule="temp">درجة الحرارة: 41 درجة مئوية</p>
+                <p data-element-rule="description">وصف الطقس: مشمس واضح</p>
+                <p data-element-rule="feel-likes">يبدو وكأنها:40 درجة مئوية</p>
+                <p data-element-rule="humidity">الرطوبة: شبه منعدمة</p>
+                <p data-element-rule="wind-speed">سرعة الرياح: 13 كم/س</p>
             </div>
         </div>
         <dialog id="error-message">
@@ -223,17 +225,11 @@
     <script type="module">
         // Main Variables
         // Element Vaiables
-        const place_text = document.getElementById("place");
-        const tempPlace_text = document.getElementById("temp-place");
-        const realFeelpPlace_text = document.getElementById("real-feel-place");
-        const address_text = document.getElementById("address");
-        const temp_text = document.getElementById("temp");
-        const desc_text = document.getElementById("desc");
-        const feelsLike_text = document.getElementById("real-feel-place");
-        const humidity_text = document.getElementById("humidity");
-        const windSpeed_text = document.getElementById("wind-speed");
         const addPlace_input = document.getElementById("city");
         const addPlace_checkbox = document.getElementById("on-device");
+
+        const weather_elements = document.querySelectorAll("[data-element-rule]")
+
         const add_place_btn = document.getElementById("send-place-info");
         const error_message = document.getElementById("error-message")
         const error_message_text = error_message.getElementById("error_text")
@@ -262,29 +258,33 @@
             // Get The User Place and Weather
             async function getWeather() {
                 let mode = placeMode();
+                let request = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${device_lat}&lon=${device_lon}&units=metric&appid=${apiKey}`)
+                let weather_data = await request.json()
+                const res = await fetch("https://libretranslate.de/translate", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        q: [weather_data.name, weather_data.weather[0].description],
+                        source: "en",
+                        target: "ar",
+                        format: "text"
+                    }),
+                    headers: { "Content-Type": "application/json" }
+                });
+                const translate_data = await res.json();
                 if (mode === "device mode") {
                     try {
                         let device_place = await getDevicePlace();
                         let device_lat = device_place.latitude;
                         let device_lon = device_place.longitude;
-                        let request = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${device_lat}&lon=${device_lon}&units=metric&appid=${apiKey}`)
-                        let weather_data = await request.json()
-                        const res = await fetch("https://libretranslate.de/translate", {
-                            method: "POST",
-                            body: JSON.stringify({
-                                q: [weather_data.name, weather_data.weather[0].description],
-                                source: "en",
-                                target: "ar",
-                                format: "text"
-                            }),
-                            headers: { "Content-Type": "application/json" }
-                        });
-                        const translate_data = await res.json();
                         // TODO: اعمل array فيها البيانات علشان جلي - تجميع ترجمة - تحديث
-                        temp_text.innerText = `درجة الحرارة: ${Math.round(weather_data.main.temp)} درجة مئوية`
-                        desc_text.innerText = `وصف الطقس: ${weather_data.weather.description}`
-                        feelsLike_text.innerText = `تبدو وكانها: ${weather_data.main.feels_like}`
-                        address_text.innerText = ``
+                        const needed_data_array = [
+                            weather_data.main.temp,                         // Tempreture
+                            weather_data.main.feels_like,                   // Feels Like
+                            translate_data[0].translatedText,               // City Name
+                            [weather_data.sys.country, weather_data.name],  // Address
+                            translate_data[1].translatedText,               // Weather Description
+                            weather_data.wind.speed                         // Wind Speed
+                        ]
                     } catch (error) {
                         error_message_text.innerText = `يوجد خطأ ما، اذا ادخلت البيانات الصحيحة تاكد من اتصالك بالشبكة ثم المحاولة مرة اخرى. error: ${error}`;
                         error_message.showModal();
@@ -296,6 +296,20 @@
                 }
                 else {
                     return null;
+                }
+            }
+
+            // TODO: ظبط الترجمة معاه 
+            function dataDIST(array) {
+                if (Array.isArray(array)) {
+                    weather_elements.forEach(ele => {
+                        if (ele.dataset.elementRule == "temp") ele.innerText = `درجة الحرارة: ${array[0]}`;
+                        if (ele.dataset.elementRule == "description") ele.innerText = `وصف الطقس: ${array[4]}`;
+                        if (ele.dataset.elementRule == "temp") ele.innerText = `درجة الحرارة: ${array[0]}`;
+                        if (ele.dataset.elementRule == "temp") ele.innerText = `درجة الحرارة: ${array[0]}`;
+                        if (ele.dataset.elementRule == "temp") ele.innerText = `درجة الحرارة: ${array[0]}`;
+                        if (ele.dataset.elementRule == "temp") ele.innerText = `درجة الحرارة: ${array[0]}`;
+                    })
                 }
             }
 
