@@ -87,7 +87,7 @@
             display: flex;
         }
 
-        .add-place {
+        .choose-place {
             width: 300px;
             aspect-ratio: 1/1;
             margin: auto;
@@ -95,15 +95,15 @@
             display: none;
         }
 
-        .add-place input {
+        .choose-place input {
             width: 100%;
         }
 
-        .add-place label {
+        .choose-place label {
             user-select: none;
         }
 
-        .add-place button {
+        .choose-place button {
             width: 100%;
             height: 30px;
             font-size: 14px;
@@ -114,7 +114,7 @@
             cursor: pointer;
         }
 
-        .add-place .use-device-place {
+        .choose-place .use-device-place {
             margin: 10px;
         }
 
@@ -186,7 +186,7 @@
         </div>
     </header>
     <main>
-        <div class="add-place">
+        <div class="choose-place" id="choose_place">
             <h2>اكتب اسم المدينة</h2>
             <input type="text" id="city">
             <div class="use-device-place" style="display: inline-flex;">
@@ -195,7 +195,7 @@
             </div>
             <button id="send-place-info">ارسال</button>
         </div>
-        <div class="main-page">
+        <div class="main-page" id="main-page">
             <div class="summary">
                 <div class="main">
                     <h2 id="place" style="margin: 20px; font-size: 40px;" data-element-rule="place">قنا</h2>
@@ -225,16 +225,19 @@
     <script type="module">
         // Main Variables
         // Element Vaiables
-        const addPlace_input = document.getElementById("city");
-        const addPlace_checkbox = document.getElementById("on-device");
+        const choosePlace_input = document.getElementById("city");
+        const choosePlace_checkbox = document.getElementById("on-device");
 
         const weather_elements = document.querySelectorAll("[data-element-rule]")
 
-        const add_place_btn = document.getElementById("send-place-info");
+        const choosePlace_btn = document.getElementById("send-place-info");
         const error_message = document.getElementById("error-message")
         const error_message_text = error_message.getElementById("error_text")
 
-        window.onload = addPlace_checkbox.checked = false;
+        window.onload = () => {
+            choosePlace_checkbox.checked = false;
+
+        }
 
         // API Key Variable     
         const apiKey = "6746a09b1b408f39b35756a151b6aed5"
@@ -245,9 +248,9 @@
 
         function App() {
             function placeMode() {
-                let addPlace_checkbox_status = addPlace_checkbox.checked;
-                let city = addPlace_input.value
-                if (addPlace_checkbox_status) { return "device mode" }
+                let choosePlace_checkbox_status = choosePlace_checkbox.checked;
+                let city = choosePlace_input.value
+                if (choosePlace_checkbox_status) { return "device mode" }
                 else {
                     if (city.trim() == "") { error_message_text.innerText = "الجاء ادخال قيمة صحيحة"; error_message.showModal(); return null; }
                     let city_mode = ["city mode", city]
@@ -258,38 +261,43 @@
             // Get The User Place and Weather
             async function getWeather() {
                 let mode = placeMode();
-                let request = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${device_lat}&lon=${device_lon}&units=metric&appid=${apiKey}`)
-                let weather_data = await request.json()
-                const res = await fetch("https://libretranslate.de/translate", {
-                    method: "POST",
-                    body: JSON.stringify({
-                        q: [weather_data.name, weather_data.weather[0].description],
-                        source: "en",
-                        target: "ar",
-                        format: "text"
-                    }),
-                    headers: { "Content-Type": "application/json" }
-                });
-                const translate_data = await res.json();
+                const countries_codes = {
+                    EG: "مصر",
+                    US: "الولايات المتحدة الأمريكية",
+                };
+                const raw_country_code = weather_data.sys.country;
+                const country = countries_codes[raw_country_code] ?? raw_country_code;
                 if (mode === "device mode") {
                     try {
                         let device_place = await getDevicePlace();
                         let device_lat = device_place.latitude;
                         let device_lon = device_place.longitude;
-                        // TODO: اعمل array فيها البيانات علشان جلي - تجميع ترجمة - تحديث
+                        let request = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${device_lat}&lon=${device_lon}&units=metric&appid=${apiKey}`)
+                        let weather_data = await request.json();
+                        const res = await fetch("https://libretranslate.de/translate", {
+                            method: "POST",
+                            body: JSON.stringify({
+                                q: [weather_data.name, weather_data.weather[0].description],
+                                source: "en",
+                                target: "ar",
+                                format: "text"
+                            }),
+                            headers: { "Content-Type": "application/json" }
+                        });
+                            const translate_data = await res.json();
                         const needed_data_array = [
                             weather_data.main.temp,                         // Tempreture
                             weather_data.main.feels_like,                   // Feels Like
                             translate_data[0].translatedText,               // City Name
-                            [weather_data.sys.country, weather_data.name],  // Address
+                            [country, weather_data.name],                   // Address
                             translate_data[1].translatedText,               // Weather Description
                             weather_data.wind.speed                         // Wind Speed
-                        ]
-                        
+                        ];
+                        dataDIST(needed_data_array)
                     } catch (error) {
                         error_message_text.innerText = `يوجد خطأ ما، اذا ادخلت البيانات الصحيحة تاكد من اتصالك بالشبكة ثم المحاولة مرة اخرى. error: ${error}`;
                         error_message.showModal();
-                    }
+                    };
                 }
 
                 else if (Array.isArray(mode)) {
@@ -305,11 +313,11 @@
                 if (Array.isArray(array)) {
                     weather_elements.forEach(ele => {
                         if (ele.dataset.elementRule == "temp") ele.innerText = `درجة الحرارة: ${array[0]}`;
-                        if (ele.dataset.elementRule == "description") ele.innerText = `وصف الطقس: ${array[4]}`;
-                        if (ele.dataset.elementRule == "temp") ele.innerText = `درجة الحرارة: ${array[0]}`;
-                        if (ele.dataset.elementRule == "temp") ele.innerText = `درجة الحرارة: ${array[0]}`;
-                        if (ele.dataset.elementRule == "temp") ele.innerText = `درجة الحرارة: ${array[0]}`;
-                        if (ele.dataset.elementRule == "temp") ele.innerText = `درجة الحرارة: ${array[0]}`;
+                        if (ele.dataset.elementRule == "feels_like") ele.innerText = `تبدو كانها: ${array[1]} درجة مئوية`;
+                        if (ele.dataset.elementRule == "place") ele.innerText = `${array[2]}`;
+                        if (ele.dataset.elementRule == "address") ele.innerText = `${array[3][0]}, ${array[3][1]}`;
+                        if (ele.dataset.elementRule == "description") ele.innerText = `وصف الطقس: ${array[4] }`;
+                        if (ele.dataset.elementRule == "wind-speed") ele.innerText = `سرعة الرياح: ${array[5]} كم/س`;
                     })
                 }
             }
@@ -334,7 +342,7 @@
             }
         }
 
-        add_place_btn.addEventListener("click", (e) => {
+        choosePlace_btn.addEventListener("click", (e) => {
             e.preventDefault();
             App();
         })
