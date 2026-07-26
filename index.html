@@ -327,6 +327,7 @@
                         );
                     } else {
                         error_message_text.innerText = "ميزة تحديد الموقع الجغرافي غير مفعلة او غير مدعومة "
+                        error_message.showModal()
                         reject(new Error("Geolocation is not supported."));
                     }
                 });
